@@ -1,0 +1,10 @@
+---
+- name: configure-server
+  hosts: sandbox
+  become: true
+
+
+
+  roles:
+    - role: add-user
+    - role: deploy-bin

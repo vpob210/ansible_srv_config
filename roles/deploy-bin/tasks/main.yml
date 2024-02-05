@@ -1,0 +1,40 @@
+---
+- name: Создать директории для бинарных файлов
+  file:
+    path: /home/testuser/app/bin
+    state: directory
+    owner: testuser
+    group: testusers
+    mode: '0750'
+
+- name: Создать директорию для файлов конфигурации
+  file:
+    path: /home/testuser/app/conf
+    state: directory
+    owner: testuser
+    group: testusers
+    mode: '0750'
+
+- name: Закинуть файлы конфигурации в директорию /home/testuser/app/conf
+  copy:
+    src: "{{ item }}"
+    dest: /home/testuser/app/conf/
+    owner: testuser
+    group: testusers
+    mode: '0750'
+  with_items:
+    - templates/web.conf
+    - templates/app.conf
+
+- name: Определить тип процессора
+  shell: "cat /proc/cpuinfo | grep -c processor"
+  register: cpu_count
+
+- name: Разместить нужный бинарный файл в директории /home/testuser/app/bin
+  copy:
+    src: "{{ 'templates/multisocket.bin' if cpu_count.stdout|int > 1 else 'templates/singlesocket.bin' }}"
+    dest: /home/testuser/app/bin/
+    owner: testuser
+    group: testusers
+    mode: '0750'
+    

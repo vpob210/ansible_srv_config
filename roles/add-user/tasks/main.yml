@@ -1,0 +1,26 @@
+---
+- name: Создать группу testusers
+  group:
+    name: testusers
+    state: present
+
+- name: Создать пользователя testuser с заданным ID
+  user:
+    name: testuser
+    uid: 2001    
+    group: testusers   
+    shell: /bin/bash
+    createhome: yes
+
+- name: Копировать публичный ключ для пользователя testuser
+  authorized_key:
+    user: testuser
+    key: "{{ lookup('file', 'templates/testuser_ssh_key.pub') }}"
+
+- name: Выдать права sudo без запроса пароля для пользователя testuser
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^testuser'
+    line: 'testuser ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s' 
